@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Underwater Plastic-Debris Detection | Ousmane Nikiema</title>
+<meta name="description" content="Senior design project: a sonar-triggered, YOLO-powered underwater plastic-debris detection system for ROVs." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <nav class="nav">
+    <div class="wrap">
+      <a class="brand" href="index.html">Ousmane Nikiema</a>
+      <div class="links">
+        <a href="index.html">Home</a>
+        <a href="projects.html" class="active">Projects</a>
+        <a href="work.html">Experience</a>
+        <a href="education.html">Education</a>
+        <a href="resume.pdf" class="cta" target="_blank" rel="noopener">Resume</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="page-head">
+    <div class="wrap">
+      <span class="eyebrow">Senior Design · ELE 4902</span>
+      <h1>Underwater Plastic-Debris Detection</h1>
+      <div class="rule"></div>
+      <div class="meta-row">
+        <span class="chip">Team of 4 · Group 11</span>
+        <span class="chip">Edge AI / YOLO v11</span>
+        <span class="chip">Raspberry Pi 5</span>
+        <span class="chip">C firmware</span>
+        <span class="chip">Sonar</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="wrap detail">
+
+    <h2>Overview</h2>
+    <p>Over two semesters, our four-person team designed and built a device that detects and identifies plastic debris polluting waterways, made to integrate with existing underwater remotely operated vehicles (ROVs). The system combines four subsystems — power, an ultrasonic (sonar) sensor array, a microcontroller, and an AI object-detection unit — into one detection pipeline. Ultrasonic sensors act as the first level of detection; once an object is sensed, a Raspberry Pi 5 running a vision model classifies it from a live camera feed as plastic or non-plastic, and logs an image plus numerical data that the ROV platform can consume.</p>
+
+    <figure class="figs">
+      <div class="fig">
+        <img src="images/debris-system.png" alt="System-level block diagram showing power, sonar, MCU, and AI camera subsystems" />
+        <figcaption>System-level block diagram — power, sonar, microcontroller, and Raspberry Pi 5 AI camera subsystems.</figcaption>
+      </div>
+      <div class="fig">
+        <img src="images/debris-wiring.png" alt="Microcontroller and sensor wiring schematic" />
+        <figcaption>Microcontroller subsystem — wiring between the MCU and the ultrasonic sensor channels.</figcaption>
+      </div>
+    </figure>
+
+    <h2>What I built</h2>
+
+    <h3>1) System design &amp; integration lead</h3>
+    <ul>
+      <li>Led the overall system design within the four-person team, from initial requirements through final hardware–software integration.</li>
+      <li>Coordinated how the sonar, microcontroller, AI, and power subsystems hand off to one another so the full detection pipeline behaves as one.</li>
+    </ul>
+
+    <h3>2) Edge-AI detection model</h3>
+    <ul>
+      <li>Trained and optimized a custom YOLO-based model for real-time edge deployment on the AI processor.</li>
+      <li>Tuned the model to a confidence threshold of 85% before it commits to a classification, balancing false positives against missed detections.</li>
+      <li>On a positive hit, the system saves an image of the object alongside numerical data for the ROV platform.</li>
+    </ul>
+
+    <h3>3) Wake-on-detection firmware</h3>
+    <ul>
+      <li>Developed C firmware with a low-power hardware interrupt that wakes the AI unit only when the sonar layer detects an object — keeping the compute-heavy vision stage idle until it's actually needed.</li>
+      <li>Used the ultrasonic system as the always-on first detection layer, with the camera/AI stage as the second, higher-cost confirmation layer.</li>
+    </ul>
+
+    <h2>Results</h2>
+    <ul>
+      <li>Final verification testing of the completed prototype met nearly all user, system, and functional requirements.</li>
+      <li>The layered sonar-then-vision architecture kept the power-hungry AI stage dormant until needed, supporting the low-power goal for ROV integration.</li>
+      <li>Remaining unmet requirements were scoped as straightforward future iterations rather than design dead-ends.</li>
+    </ul>
+
+    <div class="highlight">
+      <div class="n">85% confidence threshold · sonar-gated AI wake-up</div>
+      <div class="l">A two-stage pipeline: always-on ultrasonic detection triggers an edge-AI vision model only when an object is present.</div>
+    </div>
+
+    <div class="prevnext">
+      <a href="op-amp.html"><div class="k">Previous</div><b>← Discrete Op-Amp</b></a>
+      <a href="sumobot.html" style="text-align:right;"><div class="k">Next</div><b>Sumobot Robot →</b></a>
+    </div>
+
+  </div>
+
+  <footer>
+    <div class="wrap">
+      <span>© <span id="year"></span> Ousmane Nikiema</span>
+      <span class="fl">
+        <a href="https://github.com/yourusername" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://linkedin.com/in/ousmane-nikiema-398353217" target="_blank" rel="noopener">LinkedIn</a>
+        <a href="mailto:nikiemao38@gmail.com">Email</a>
+      </span>
+    </div>
+  </footer>
+  <script>document.getElementById("year").textContent=new Date().getFullYear();</script>
+</body>
+</html>

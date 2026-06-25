@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Discrete Op-Amp Design | Ousmane Nikiema</title>
+<meta name="description" content="An operational amplifier designed from discrete BJTs — current mirror, differential pair, and common-collector output stages — characterized against simulation." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <nav class="nav">
+    <div class="wrap">
+      <a class="brand" href="index.html">Ousmane Nikiema</a>
+      <div class="links">
+        <a href="index.html">Home</a>
+        <a href="projects.html" class="active">Projects</a>
+        <a href="work.html">Experience</a>
+        <a href="education.html">Education</a>
+        <a href="resume.pdf" class="cta" target="_blank" rel="noopener">Resume</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="page-head">
+    <div class="wrap">
+      <span class="eyebrow">Analog Circuits · ELE 3151</span>
+      <h1>Discrete Op-Amp Design</h1>
+      <div class="rule"></div>
+      <div class="meta-row">
+        <span class="chip">BJT (2N3904)</span>
+        <span class="chip">Current mirror</span>
+        <span class="chip">Differential pair</span>
+        <span class="chip">Multisim</span>
+        <span class="chip">Characterization</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="wrap detail">
+
+    <h2>Overview</h2>
+    <p>I designed an operational amplifier from discrete components — no op-amp IC — and then characterized it the way you would a real part. Starting from a biased current mirror, I added a differential pair and two common-collector output stages, then measured differential and common-mode gain, CMRR, slew rate, output swing, input bias current, offset, and bandwidth, comparing every result against simulation.</p>
+
+    <figure class="figs">
+      <div class="fig">
+        <img src="images/opamp-design.jpg" alt="Hand-drawn current mirror schematic and bias calculations" />
+        <figcaption>Design notebook — current-mirror schematic and the resistor calculation for an 800&nbsp;µA bias.</figcaption>
+      </div>
+      <div class="fig">
+        <img src="images/opamp-plot.png" alt="Output current vs load resistance, with and without emitter degeneration" />
+        <figcaption>Bias current vs. load resistance — emitter degeneration holds I<sub>Q</sub> near 800&nbsp;µA across a wider range.</figcaption>
+      </div>
+    </figure>
+
+    <h2>What I built</h2>
+
+    <h3>1) Current-mirror bias network</h3>
+    <ul>
+      <li>Designed a current mirror for an 800&nbsp;µA bias at ±12&nbsp;V rails using 2N3904 BJTs, then added emitter degeneration to stabilize it against load.</li>
+      <li>Swept the load resistance from 10&nbsp;Ω to 500&nbsp;kΩ and showed the degenerated mirror held ≈800&nbsp;µA far more consistently than the basic version.</li>
+    </ul>
+
+    <h3>2) Differential pair &amp; output stages</h3>
+    <ul>
+      <li>Connected a differential amplifier to the current source, then added two common-collector stages — one to cancel DC offset, one as a buffer to reduce output loading.</li>
+      <li>Built and simulated the full amplifier in Multisim before moving to the bench.</li>
+    </ul>
+
+    <h3>3) Full characterization</h3>
+    <ul>
+      <li>Measured differential gain, common-mode gain and CMRR, slew rate, output voltage swing, input bias current, output offset, and open-loop bandwidth.</li>
+      <li>Evaluated the amplifier in inverting, non-inverting, and buffer configurations at 2&nbsp;V/V and 10&nbsp;V/V, sweeping frequency to find each closed-loop bandwidth.</li>
+    </ul>
+
+    <h2>Results</h2>
+    <ul>
+      <li>Differential gain matched simulation within ~3%; CMRR measured ≈78&nbsp;dB.</li>
+      <li>Closed-loop gains tracked the nominal values closely at low gain (under 10% error at 2&nbsp;V/V), with larger deviation at 10&nbsp;V/V — traced to the amplifier's deliberately low ~28&nbsp;V/V open-loop gain.</li>
+      <li>The current mirror landed within ~1% of its 800&nbsp;µA target and proved insensitive to BJT swap, confirming a robust bias.</li>
+    </ul>
+
+    <div class="highlight">
+      <div class="n">≈78 dB CMRR · gain within ~3% of simulation</div>
+      <div class="l">A working op-amp from discrete BJTs, characterized end to end and explained against its non-ideal limits.</div>
+    </div>
+
+    <div class="prevnext">
+      <a href="heart-rate-monitor.html"><div class="k">Previous</div><b>← FPGA Heart-Rate Monitor</b></a>
+      <a href="debris-detection.html" style="text-align:right;"><div class="k">Next</div><b>Debris Detection →</b></a>
+    </div>
+
+  </div>
+
+  <footer>
+    <div class="wrap">
+      <span>© <span id="year"></span> Ousmane Nikiema</span>
+      <span class="fl">
+        <a href="https://github.com/yourusername" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://linkedin.com/in/ousmane-nikiema-398353217" target="_blank" rel="noopener">LinkedIn</a>
+        <a href="mailto:nikiemao38@gmail.com">Email</a>
+      </span>
+    </div>
+  </footer>
+  <script>document.getElementById("year").textContent=new Date().getFullYear();</script>
+</body>
+</html>

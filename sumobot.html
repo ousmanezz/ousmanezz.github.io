@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Sumobot Autonomous Robot | Ousmane Nikiema</title>
+<meta name="description" content="An STM32U575-based autonomous competition robot with PWM motor control, IR line-sensing and object detection, and an FSM behavior loop." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <nav class="nav">
+    <div class="wrap">
+      <a class="brand" href="index.html">Ousmane Nikiema</a>
+      <div class="links">
+        <a href="index.html">Home</a>
+        <a href="projects.html" class="active">Projects</a>
+        <a href="work.html">Experience</a>
+        <a href="education.html">Education</a>
+        <a href="resume.pdf" class="cta" target="_blank" rel="noopener">Resume</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="page-head">
+    <div class="wrap">
+      <span class="eyebrow">Embedded Systems · ELE 2610</span>
+      <h1>Sumobot Autonomous Robot</h1>
+      <div class="rule"></div>
+      <div class="meta-row">
+        <span class="chip">STM32U575</span>
+        <span class="chip">Bare-metal C</span>
+        <span class="chip">PWM</span>
+        <span class="chip">IR sensing</span>
+        <span class="chip">FSM</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="wrap detail">
+
+    <h2>Overview</h2>
+    <p>I designed, built, and tested an autonomous Sumobot for competition: a robot that waits five seconds, then hunts for an opponent, pushes it out of the ring, and backs off when it senses the ring's edge — all on an STM32U575 in bare-metal C. The robot is organized into five subsystems (power, motion, display, line sensing, and object detection), each independently bench-tested before integration, and the whole behavior is coordinated by a finite state machine.</p>
+
+    <figure class="figs">
+      <div class="fig">
+        <img src="images/sumobot.jpg" alt="Assembled Sumobot with battery pack, breadboard, and drive wheels" />
+        <figcaption>The assembled bot — STM32U575, motor driver, IR sensors, and a 7.5&nbsp;V battery pack on a custom chassis.</figcaption>
+      </div>
+      <div class="fig">
+        <img src="images/sumobot-wiring.jpg" alt="Sumobot internal wiring and motor control" />
+        <figcaption>Drive side — geared motors, voltage regulation, and the motor-control wiring.</figcaption>
+      </div>
+    </figure>
+
+    <h2>What I built</h2>
+
+    <h3>1) Motion &amp; motor control</h3>
+    <ul>
+      <li>Drove two motors through a dual H-bridge driver using a timer in PWM mode (~3&nbsp;kHz) to set speed, plus four GPIOs for direction.</li>
+      <li>Implemented forward, backward, turning, spinning, and stop primitives, then verified each one's PWM waveform and duty cycle on an Analog Discovery scope.</li>
+    </ul>
+
+    <h3>2) Line sensing &amp; object detection</h3>
+    <ul>
+      <li>Used two analog reflectance sensors to read the ring edge, converting reflected-light intensity to a percentage via ADC and thresholding it to a binary white/black decision.</li>
+      <li>Built an IR transmitter/receiver pair (≈38&nbsp;kHz, 0.48&nbsp;ms on / 5&nbsp;ms off) to detect opponents, with a potentiometer to tune detection distance.</li>
+    </ul>
+
+    <h3>3) Behavior FSM</h3>
+    <ul>
+      <li>Wrote a finite state machine over the sensor inputs — search (spin), engage (push), and edge-recovery (stop → back up → turn) — so the robot stays in the ring while hunting.</li>
+      <li>Surfaced live sensor percentages and state messages ("Searching…", "Got you!", "Whoops…") on an LCD to make debugging and threshold tuning fast.</li>
+    </ul>
+
+    <h2>Testing &amp; results</h2>
+    <ul>
+      <li>Authored a full test plan with per-subsystem procedures, expected vs. actual results, and troubleshooting steps — every subsystem passed its bench test.</li>
+      <li>Met all three competition constraints: under 7&nbsp;×&nbsp;7&nbsp;in footprint (measured 6.7&nbsp;×&nbsp;6.5&nbsp;in), under 1.5&nbsp;lb (≈1.39&nbsp;lb), and a 5-second start delay.</li>
+      <li>Verified power delivery (7.27&nbsp;V main, 4.98&nbsp;V regulated, 3.29&nbsp;V logic) and tuned line-sensor thresholds against measured white/black readings.</li>
+    </ul>
+
+    <div class="highlight">
+      <div class="n">5 subsystems · all bench-tested · all constraints met</div>
+      <div class="l">Power, motion, display, line sensing, and object detection — each validated independently, then integrated under one FSM.</div>
+    </div>
+
+    <div class="prevnext">
+      <a href="debris-detection.html"><div class="k">Previous</div><b>← Debris Detection</b></a>
+      <a href="heart-rate-monitor.html" style="text-align:right;"><div class="k">Next</div><b>FPGA Heart-Rate Monitor →</b></a>
+    </div>
+
+  </div>
+
+  <footer>
+    <div class="wrap">
+      <span>© <span id="year"></span> Ousmane Nikiema</span>
+      <span class="fl">
+        <a href="https://github.com/yourusername" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://linkedin.com/in/ousmane-nikiema-398353217" target="_blank" rel="noopener">LinkedIn</a>
+        <a href="mailto:nikiemao38@gmail.com">Email</a>
+      </span>
+    </div>
+  </footer>
+  <script>document.getElementById("year").textContent=new Date().getFullYear();</script>
+</body>
+</html>
