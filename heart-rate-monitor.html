@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>FPGA Heart-Rate Monitor | Ousmane Nikiema</title>
-<meta name="description" content="A DE10-Lite FPGA heart-rate monitor: a NIOS II soft-core samples a pulse sensor through the MAX10 ADC, computes BPM, and displays it on VGA and a 7-segment display." />
+<title>FPGA Heart Rate Monitor | Ousmane Nikiema</title>
+<meta name="description" content="A DE10-Lite FPGA heart rate monitor. A NIOS II soft core samples a pulse sensor through the MAX10 ADC, computes BPM, and displays it on VGA and a seven segment display." />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
@@ -28,14 +28,14 @@
   <div class="page-head">
     <div class="wrap">
       <span class="eyebrow">Digital Systems · ELE 3510</span>
-      <h1>FPGA Heart-Rate Monitor</h1>
+      <h1>FPGA Heart Rate Monitor</h1>
       <div class="rule"></div>
       <div class="meta-row">
         <span class="chip">DE10-Lite / MAX10</span>
         <span class="chip">NIOS II</span>
         <span class="chip">Modular ADC</span>
         <span class="chip">VGA</span>
-        <span class="chip">7-segment</span>
+        <span class="chip">Seven segment</span>
       </div>
     </div>
   </div>
@@ -43,12 +43,12 @@
   <div class="wrap detail">
 
     <h2>Overview</h2>
-    <p>I built a heart-rate monitor on a DE10-Lite FPGA that reads a pulse sensor, computes beats per minute, and shows live readings on both a 7-segment display and a VGA monitor. The analog pulse signal is digitized by the MAX10's built-in ADC, and a NIOS II soft-core processor handles the signal processing and display logic — a complete hardware-plus-software digital system on a single board.</p>
+    <p>I built a heart rate monitor on a DE10-Lite FPGA that reads a pulse sensor, computes beats per minute, and shows live readings on both a seven segment display and a VGA monitor. The analog pulse signal is digitized by the MAX10 built in ADC, and a NIOS II soft core processor handles the signal processing and display logic, a complete hardware and software digital system on a single board.</p>
 
     <figure class="figs">
       <div class="fig">
-        <img src="images/heart-rate-flow.png" alt="Software flowchart for the heart-rate monitor" />
-        <figcaption>Software flow — sample the ADC into a buffer, detect peaks, compute BPM, then update the 7-segment and VGA outputs.</figcaption>
+        <img src="images/heart-rate-flow.png" alt="Software flowchart for the heart rate monitor" />
+        <figcaption>Software flow. Sample the ADC into a buffer, detect peaks, compute BPM, then update the seven segment and VGA outputs.</figcaption>
       </div>
     </figure>
 
@@ -56,8 +56,8 @@
 
     <h3>1) NIOS II system in Platform Designer</h3>
     <ul>
-      <li>Assembled the soft-core system: 120&nbsp;KB on-chip memory, JTAG UART, timer, system ID, and a 50&nbsp;MHz PLL configured to supply a 25&nbsp;MHz VGA clock and a 10&nbsp;MHz ADC clock.</li>
-      <li>Added the modular ADC (Channel 1), a VGA character buffer with DMA, the VGA controller and dual-clock buffer, and a 16-bit PIO for the 7-segment display.</li>
+      <li>Assembled the soft core system with 120 KB of on chip memory, a JTAG UART, a timer, a system ID, and a 50 MHz PLL configured to supply a 25 MHz VGA clock and a 10 MHz ADC clock.</li>
+      <li>Added the modular ADC on Channel 1, a VGA character buffer with DMA, the VGA controller and dual clock buffer, and a 16 bit PIO for the seven segment display.</li>
     </ul>
 
     <h3>2) BPM signal processing in C</h3>
@@ -66,27 +66,27 @@
       <li>Added a "No Signal" state when readings stay flat (no finger on the sensor), and displayed current BPM, average BPM, recent history, peak count, and sampling rate on the VGA monitor.</li>
     </ul>
 
-    <h3>3) Bring-up &amp; verification</h3>
+    <h3>3) Bring up and verification</h3>
     <ul>
-      <li>Validated each peripheral independently — drove the 7-segment with a counter, printed a test string to VGA, and fed a known sine wave into the ADC via an Analog Discovery wavegen.</li>
-      <li>Measured the pulse sensor's 0.9–1.8&nbsp;V swing (≈1200–2400 ADC counts) and set the detection threshold at ~1200 to reject noise.</li>
+      <li>Validated each peripheral on its own. I drove the seven segment display with a counter, printed a test string to VGA, and fed a known sine wave into the ADC with an Analog Discovery wave generator.</li>
+      <li>Measured the pulse sensor swing from 0.9 V to 1.8 V (about 1200 to 2400 ADC counts) and set the detection threshold near 1200 to reject noise.</li>
     </ul>
 
     <h2>Results</h2>
     <ul>
-      <li>Swept sampling rate and sample size, settling on 100&nbsp;Hz / 250 samples for the best peak-detection accuracy.</li>
-      <li>Validated BPM against a smartwatch across five 30-second trials (rest, hand movement, and post-exercise) with closely matching readings.</li>
-      <li>Eliminated VGA flicker by writing static content once and updating only dynamic values when the ADC buffer fills.</li>
+      <li>Swept sampling rate and sample size, then settled on 100 Hz and 250 samples for the best peak detection accuracy.</li>
+      <li>Validated BPM against a smartwatch across five 30 second trials covering rest, hand movement, and post exercise, with closely matching readings.</li>
+      <li>Removed VGA flicker by writing static content once and updating only the dynamic values when the ADC buffer fills.</li>
     </ul>
 
     <div class="highlight">
-      <div class="n">NIOS II soft-core · ADC → BPM → VGA + 7-segment</div>
-      <div class="l">A full FPGA digital system: analog acquisition, real-time signal processing, and dual live displays on one DE10-Lite board.</div>
+      <div class="n">A NIOS II soft core taking a pulse from ADC to BPM to VGA and seven segment</div>
+      <div class="l">A full FPGA digital system. Analog acquisition, real time signal processing, and two live displays on one DE10-Lite board.</div>
     </div>
 
     <div class="prevnext">
       <a href="sumobot.html"><div class="k">Previous</div><b>← Sumobot Robot</b></a>
-      <a href="op-amp.html" style="text-align:right;"><div class="k">Next</div><b>Discrete Op-Amp →</b></a>
+      <a href="op-amp.html" style="text-align:right;"><div class="k">Next</div><b>Discrete Operational Amplifier →</b></a>
     </div>
 
   </div>
@@ -95,7 +95,7 @@
     <div class="wrap">
       <span>© <span id="year"></span> Ousmane Nikiema</span>
       <span class="fl">
-        <a href="https://github.com/yourusername" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://github.com/ousmanezz" target="_blank" rel="noopener">GitHub</a>
         <a href="https://linkedin.com/in/ousmane-nikiema-398353217" target="_blank" rel="noopener">LinkedIn</a>
         <a href="mailto:nikiemao38@gmail.com">Email</a>
       </span>

@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Underwater Plastic-Debris Detection | Ousmane Nikiema</title>
-<meta name="description" content="Senior design project: a sonar-triggered, YOLO-powered underwater plastic-debris detection system for ROVs." />
+<title>Underwater Plastic Debris Detection | Ousmane Nikiema</title>
+<meta name="description" content="Senior design: a sonar triggered, YOLOv11 powered underwater plastic debris detection system for ROVs, built around an STM32U575 and a Raspberry Pi 5." />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
@@ -28,14 +28,18 @@
   <div class="page-head">
     <div class="wrap">
       <span class="eyebrow">Senior Design · ELE 4902</span>
-      <h1>Underwater Plastic-Debris Detection</h1>
+      <h1>Underwater Plastic Debris Detection</h1>
       <div class="rule"></div>
       <div class="meta-row">
-        <span class="chip">Team of 4 · Group 11</span>
-        <span class="chip">Edge AI / YOLO v11</span>
+        <span class="chip">Team of four</span>
+        <span class="chip">Edge AI / YOLOv11</span>
         <span class="chip">Raspberry Pi 5</span>
-        <span class="chip">C firmware</span>
+        <span class="chip">STM32U575</span>
         <span class="chip">Sonar</span>
+        <span class="chip">C firmware</span>
+      </div>
+      <div class="proj-actions">
+        <a class="btn primary" href="https://github.com/ousmanezz/Underwater-Object-Detection" target="_blank" rel="noopener">View on GitHub</a>
       </div>
     </div>
   </div>
@@ -43,54 +47,129 @@
   <div class="wrap detail">
 
     <h2>Overview</h2>
-    <p>Over two semesters, our four-person team designed and built a device that detects and identifies plastic debris polluting waterways, made to integrate with existing underwater remotely operated vehicles (ROVs). The system combines four subsystems — power, an ultrasonic (sonar) sensor array, a microcontroller, and an AI object-detection unit — into one detection pipeline. Ultrasonic sensors act as the first level of detection; once an object is sensed, a Raspberry Pi 5 running a vision model classifies it from a live camera feed as plastic or non-plastic, and logs an image plus numerical data that the ROV platform can consume.</p>
+    <p>Over two semesters, our team of four designed and built a device that detects and identifies plastic debris in waterways, made to integrate with commercial mini class remotely operated vehicles (ROVs) and autonomous underwater vehicles. The motivation was the volume of submerged plastic polluting freshwater bodies like the Great Lakes, where manual and surface level searching is slow and inefficient. The system pairs a low power microcontroller with an edge AI vision unit so that the power hungry camera stage only runs when something is actually there.</p>
+    <p>The design is organized into four subsystems: a three sensor sonar array, an ultra low power STM32U575 microcontroller, a Raspberry Pi 5 edge AI unit, and a regulated battery power supply. I led the system design across the team and owned the AI model and the wake on detection firmware.</p>
+
+    <!-- ============ VIDEO DEMO ============ -->
+    <h2>Demo</h2>
+    <!-- TO ADD YOUR VIDEO: replace this whole .video-ph block with either
+         (A) a hosted video, e.g. YouTube:
+         <div class="fig"><iframe width="100%" height="460" src="https://www.youtube.com/embed/VIDEO_ID"
+              title="Underwater detection demo" frameborder="0" allowfullscreen></iframe></div>
+         or (B) a local file you add to the images/ folder:
+         <video controls width="100%" style="border-radius:16px" poster="images/debris-detection.png">
+              <source src="images/debris-demo.mp4" type="video/mp4"></video>  -->
+    <div class="video-ph">
+      <span class="play" aria-hidden="true">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+      </span>
+      <span class="cap">Video demo goes here</span>
+      <p>Drop your demo clip in and it plays right here. See the comment in this file for the two ways to add it (a YouTube link or a local mp4 in the images folder).</p>
+    </div>
 
     <figure class="figs">
       <div class="fig">
-        <img src="images/debris-system.png" alt="System-level block diagram showing power, sonar, MCU, and AI camera subsystems" />
-        <figcaption>System-level block diagram — power, sonar, microcontroller, and Raspberry Pi 5 AI camera subsystems.</figcaption>
+        <img src="images/debris-detection.png" alt="YOLOv11 model detecting a plastic bottle underwater with an 80 percent confidence box" />
+        <figcaption>The custom YOLOv11 model running underwater. The live frame rate is shown at the top, and the detection box reads "pbottle: 80%" over the plastic bottle.</figcaption>
       </div>
       <div class="fig">
-        <img src="images/debris-wiring.png" alt="Microcontroller and sensor wiring schematic" />
-        <figcaption>Microcontroller subsystem — wiring between the MCU and the ultrasonic sensor channels.</figcaption>
+        <img src="images/debris-pool.jpg" alt="Underwater testing in an inflatable pool" />
+        <figcaption>Testing environment. Training images were captured in an inflatable pool to teach the model the real lighting and water conditions.</figcaption>
+      </div>
+    </figure>
+
+    <h2>How it works</h2>
+    <p>The system runs a two stage pipeline that trades a little detection latency for a large power saving. The STM32U575 stays awake at all times as a tripwire, continuously polling the sonar array. When the sonar confirms an object inside the one meter range, the microcontroller raises a hardware wake up signal on a GPIO pin to bring the Raspberry Pi 5 out of idle. The Pi then captures a live feed at 8 frames per second through its AI camera and runs each frame through the YOLOv11 model. If the model is at least about 80 percent confident that the object is plastic, it logs an image along with a CSV record of the timestamp, confidence score, and classification for later review.</p>
+
+    <figure class="figs">
+      <div class="fig">
+        <img src="images/debris-system.png" alt="System level block diagram of the four subsystems" />
+        <figcaption>System block diagram. The MCU and sonar form the always on detection layer that gates the Raspberry Pi AI camera stage.</figcaption>
+      </div>
+      <div class="fig">
+        <img src="images/debris-schematic.png" alt="System wiring schematic with battery, regulators, MCU, three sensors, and Raspberry Pi" />
+        <figcaption>System wiring. A 14.8 V battery feeds dual regulators, one for the Pi and one for the MCU and three SEN0599 sonar sensors.</figcaption>
       </div>
     </figure>
 
     <h2>What I built</h2>
 
-    <h3>1) System design &amp; integration lead</h3>
+    <h3>1) System design lead</h3>
     <ul>
-      <li>Led the overall system design within the four-person team, from initial requirements through final hardware–software integration.</li>
-      <li>Coordinated how the sonar, microcontroller, AI, and power subsystems hand off to one another so the full detection pipeline behaves as one.</li>
+      <li>Led the overall system design for the team of four, from the initial requirements through the final hardware and software integration.</li>
+      <li>Defined how the sonar, microcontroller, AI, and power subsystems hand off to each other so the full detection pipeline behaves as one system.</li>
     </ul>
 
-    <h3>2) Edge-AI detection model</h3>
+    <h3>2) Edge AI detection model</h3>
     <ul>
-      <li>Trained and optimized a custom YOLO-based model for real-time edge deployment on the AI processor.</li>
-      <li>Tuned the model to a confidence threshold of 85% before it commits to a classification, balancing false positives against missed detections.</li>
-      <li>On a positive hit, the system saves an image of the object alongside numerical data for the ROV platform.</li>
+      <li>Chose the YOLOv11 architecture for its single pass, real time inference, which fits the limited compute of a battery powered Raspberry Pi 5.</li>
+      <li>Ran a proof of concept on a public rock paper scissors dataset (3,129 images) and confirmed the pipeline by reaching a mean average precision of about 0.87.</li>
+      <li>Captured over 750 images of bottles and cans in an inflatable pool, annotated bounding boxes with makesense.ai, and fine tuned the model for the underwater environment so it learned the real reflections, lighting, and distortion.</li>
+      <li>Trained for 200 epochs over roughly 4 hours and 45 minutes. The custom model ran near 10 frames per second at 640 by 640 with about 0.1 second inference time.</li>
     </ul>
 
-    <h3>3) Wake-on-detection firmware</h3>
+    <h3>3) Wake on detection firmware</h3>
     <ul>
-      <li>Developed C firmware with a low-power hardware interrupt that wakes the AI unit only when the sonar layer detects an object — keeping the compute-heavy vision stage idle until it's actually needed.</li>
-      <li>Used the ultrasonic system as the always-on first detection layer, with the camera/AI stage as the second, higher-cost confirmation layer.</li>
+      <li>Wrote C firmware for the STM32U575 that polls the sonar array and raises a low power hardware interrupt to wake the AI unit only when an object is present, keeping the compute heavy vision stage idle the rest of the time.</li>
+      <li>Used the sonar layer as the always on first stage and the camera with AI as the second, higher cost confirmation stage.</li>
     </ul>
 
-    <h2>Results</h2>
+    <h2>Inside the subsystems</h2>
+    <div class="specs">
+      <div class="spec-card">
+        <h4>Sonar array</h4>
+        <ul>
+          <li><b>3 &times; SEN0599</b> ultrasonic sensors</li>
+          <li>Arranged in a <b>30&deg; arc</b>, UART to MCU</li>
+          <li>Operates above <b>50 kHz</b>, safe for marine life</li>
+          <li>IP68 rated, <b>6 m</b> max range</li>
+        </ul>
+      </div>
+      <div class="spec-card">
+        <h4>Microcontroller</h4>
+        <ul>
+          <li><b>STM32U575</b>, Cortex-M33 to 160 MHz</li>
+          <li>3.3 V logic, no level shifting needed</li>
+          <li>Always on tripwire, GPIO wake up signal</li>
+          <li>Built to a <b>150 mW</b> power budget</li>
+        </ul>
+      </div>
+      <div class="spec-card">
+        <h4>AI unit</h4>
+        <ul>
+          <li><b>Raspberry Pi 5</b> with a 26 TOPS Hailo AI Hat</li>
+          <li>AI camera (IMX500) at <b>8 FPS</b></li>
+          <li>Binary plastic vs non plastic, CSV logging</li>
+          <li>4.25 W idle, <b>13.5 W</b> under load</li>
+        </ul>
+      </div>
+      <div class="spec-card">
+        <h4>Power</h4>
+        <ul>
+          <li><b>14.8 V, 16 Ah</b> LiPo battery</li>
+          <li>About <b>9.5 hours</b> of runtime</li>
+          <li>Dual regulation, 5.3 V for Pi, 5 V for MCU</li>
+          <li>IP68 rated enclosure</li>
+        </ul>
+      </div>
+    </div>
+
+    <h2>Results and verification</h2>
     <ul>
-      <li>Final verification testing of the completed prototype met nearly all user, system, and functional requirements.</li>
-      <li>The layered sonar-then-vision architecture kept the power-hungry AI stage dormant until needed, supporting the low-power goal for ROV integration.</li>
-      <li>Remaining unmet requirements were scoped as straightforward future iterations rather than design dead-ends.</li>
+      <li>The completed prototype met nearly all of the user, system, and functional requirements during final verification testing.</li>
+      <li>Plastic bottles were correctly identified once confidence passed about 80 percent, while aluminum cans were not falsely flagged as plastic.</li>
+      <li>The system weighed 3.18 kg, came in under the 4 kg limit, and fit the size envelope for a mini class ROV.</li>
+      <li>Estimated runtime of about 9.5 hours far exceeded the original 3 to 5 hour target, and the full build came in at $1,219.83, under the $1,500 budget.</li>
+      <li>Sonar detection held across 20 cm to 100 cm with an average error near 3.62 cm, enough to reliably trigger the AI stage.</li>
     </ul>
 
     <div class="highlight">
-      <div class="n">85% confidence threshold · sonar-gated AI wake-up</div>
-      <div class="l">A two-stage pipeline: always-on ultrasonic detection triggers an edge-AI vision model only when an object is present.</div>
+      <div class="n">A two stage pipeline that runs the AI only when it has to</div>
+      <div class="l">Always on sonar gates a YOLOv11 vision model at 8 FPS, so the system reaches roughly 9.5 hours of runtime while classifying plastic at about 80 percent confidence.</div>
     </div>
 
     <div class="prevnext">
-      <a href="op-amp.html"><div class="k">Previous</div><b>← Discrete Op-Amp</b></a>
+      <a href="op-amp.html"><div class="k">Previous</div><b>← Discrete Operational Amplifier</b></a>
       <a href="sumobot.html" style="text-align:right;"><div class="k">Next</div><b>Sumobot Robot →</b></a>
     </div>
 
@@ -100,7 +179,7 @@
     <div class="wrap">
       <span>© <span id="year"></span> Ousmane Nikiema</span>
       <span class="fl">
-        <a href="https://github.com/yourusername" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://github.com/ousmanezz" target="_blank" rel="noopener">GitHub</a>
         <a href="https://linkedin.com/in/ousmane-nikiema-398353217" target="_blank" rel="noopener">LinkedIn</a>
         <a href="mailto:nikiemao38@gmail.com">Email</a>
       </span>

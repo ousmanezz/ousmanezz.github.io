@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Sumobot Autonomous Robot | Ousmane Nikiema</title>
-<meta name="description" content="An STM32U575-based autonomous competition robot with PWM motor control, IR line-sensing and object detection, and an FSM behavior loop." />
+<meta name="description" content="An STM32U575 based autonomous competition robot with PWM motor control, IR line sensing and object detection, and a finite state machine behavior loop, written in bare metal C." />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
@@ -32,10 +32,13 @@
       <div class="rule"></div>
       <div class="meta-row">
         <span class="chip">STM32U575</span>
-        <span class="chip">Bare-metal C</span>
+        <span class="chip">Bare metal C</span>
         <span class="chip">PWM</span>
         <span class="chip">IR sensing</span>
-        <span class="chip">FSM</span>
+        <span class="chip">Finite state machine</span>
+      </div>
+      <div class="proj-actions">
+        <a class="btn primary" href="https://github.com/ousmanezz/sumobot-project" target="_blank" rel="noopener">View on GitHub</a>
       </div>
     </div>
   </div>
@@ -43,54 +46,79 @@
   <div class="wrap detail">
 
     <h2>Overview</h2>
-    <p>I designed, built, and tested an autonomous Sumobot for competition: a robot that waits five seconds, then hunts for an opponent, pushes it out of the ring, and backs off when it senses the ring's edge — all on an STM32U575 in bare-metal C. The robot is organized into five subsystems (power, motion, display, line sensing, and object detection), each independently bench-tested before integration, and the whole behavior is coordinated by a finite state machine.</p>
+    <p>I designed, built, and tested an autonomous Sumobot for competition. After a five second start delay, the robot hunts for an opponent, drives forward to push it out of the ring, and backs away when it senses the ring edge, all running in bare metal C on an STM32U575. The robot is organized into five subsystems, power, motion, display, line sensing, and object detection, and a finite state machine ties their inputs together into the full search and push behavior.</p>
 
     <figure class="figs">
       <div class="fig">
         <img src="images/sumobot.jpg" alt="Assembled Sumobot with battery pack, breadboard, and drive wheels" />
-        <figcaption>The assembled bot — STM32U575, motor driver, IR sensors, and a 7.5&nbsp;V battery pack on a custom chassis.</figcaption>
-      </div>
-      <div class="fig">
-        <img src="images/sumobot-wiring.jpg" alt="Sumobot internal wiring and motor control" />
-        <figcaption>Drive side — geared motors, voltage regulation, and the motor-control wiring.</figcaption>
+        <figcaption>The assembled robot. An STM32U575, a dual H bridge motor driver, IR and reflectance sensors, and a 7.5 V battery pack on a custom aluminum chassis.</figcaption>
       </div>
     </figure>
 
+    <h2>How it works</h2>
+    <p>Five AA cells supply 7.5 V. A 5 V regulator powers the STM32U575, which in turn provides 3.3 V to the sensors, while the motors run from the unregulated battery rail through the motor driver. Two analog reflectance sensors at the front read the ring edge, an infrared transmitter and receiver pair watches for opponents, and an LCD shows live readings and state messages so tuning on the bench is fast. The behavior itself lives in a finite state machine that moves between searching, engaging, and edge recovery based on what the sensors report.</p>
+
     <h2>What I built</h2>
 
-    <h3>1) Motion &amp; motor control</h3>
+    <h3>1) Motion and motor control</h3>
     <ul>
-      <li>Drove two motors through a dual H-bridge driver using a timer in PWM mode (~3&nbsp;kHz) to set speed, plus four GPIOs for direction.</li>
-      <li>Implemented forward, backward, turning, spinning, and stop primitives, then verified each one's PWM waveform and duty cycle on an Analog Discovery scope.</li>
+      <li>Drove two motors through a dual H bridge driver using a hardware timer in PWM mode at about 3 kHz to set speed, with four GPIO pins controlling direction.</li>
+      <li>Wrote movement primitives for forward, backward, turning, spinning, and stop, then verified each one's PWM waveform and duty cycle on an Analog Discovery scope.</li>
     </ul>
 
-    <h3>2) Line sensing &amp; object detection</h3>
+    <h3>2) Line sensing and object detection</h3>
     <ul>
-      <li>Used two analog reflectance sensors to read the ring edge, converting reflected-light intensity to a percentage via ADC and thresholding it to a binary white/black decision.</li>
-      <li>Built an IR transmitter/receiver pair (≈38&nbsp;kHz, 0.48&nbsp;ms on / 5&nbsp;ms off) to detect opponents, with a potentiometer to tune detection distance.</li>
+      <li>Read the two reflectance sensors with a multi channel ADC, converted reflected light to a percentage, and thresholded it into a binary white or black decision for the ring edge.</li>
+      <li>Generated a modulated infrared carrier near 38 kHz with a timer in toggle mode, pulsing about 0.48 ms on and 5 ms off, and tuned detection distance with a potentiometer.</li>
     </ul>
 
-    <h3>3) Behavior FSM</h3>
+    <h3>3) Behavior firmware and FSM</h3>
     <ul>
-      <li>Wrote a finite state machine over the sensor inputs — search (spin), engage (push), and edge-recovery (stop → back up → turn) — so the robot stays in the ring while hunting.</li>
-      <li>Surfaced live sensor percentages and state messages ("Searching…", "Got you!", "Whoops…") on an LCD to make debugging and threshold tuning fast.</li>
+      <li>Structured the firmware around register level initialization routines for the clock, GPIO, timers, ADC, and interrupts, with clean movement functions on top.</li>
+      <li>Implemented a finite state machine over forward, backward, left turn, and right turn states, using interrupt service routines to read the ADC channels and toggle the IR carrier.</li>
+      <li>Surfaced sensor percentages and state messages such as "Searching", "Got you", and "Whoops" on the LCD to make debugging and threshold tuning quick.</li>
     </ul>
 
-    <h2>Testing &amp; results</h2>
+    <h2>Full system schematic</h2>
+    <figure class="figs">
+      <div class="fig">
+        <img src="images/sumobot-schematic.png" alt="Full Sumobot schematic with STM32U575, motor driver, line sensors, and IR sensors" />
+        <figcaption>The full circuit. The STM32U575 ties together the motor driver, the left and right reflectance sensors, and the infrared transmitter and receiver pairs with their potentiometers and filtering.</figcaption>
+      </div>
+    </figure>
+
+    <h2>Skills and techniques used</h2>
+    <p>Beyond the basics on my resume, this project came together through a lot of low level embedded work:</p>
+    <div class="chips">
+      <span class="chip">Register level C (CMSIS)</span>
+      <span class="chip">NVIC interrupt handling</span>
+      <span class="chip">Timer config (PWM, toggle, periodic)</span>
+      <span class="chip">Multi channel ADC scanning</span>
+      <span class="chip">H bridge motor control</span>
+      <span class="chip">IR carrier modulation</span>
+      <span class="chip">SPI LCD driving</span>
+      <span class="chip">Analog sensor thresholding</span>
+      <span class="chip">Voltage regulation</span>
+      <span class="chip">Oscilloscope verification</span>
+      <span class="chip">Finite state machine design</span>
+      <span class="chip">Soldering &amp; breadboarding</span>
+    </div>
+
+    <h2>Testing and results</h2>
     <ul>
-      <li>Authored a full test plan with per-subsystem procedures, expected vs. actual results, and troubleshooting steps — every subsystem passed its bench test.</li>
-      <li>Met all three competition constraints: under 7&nbsp;×&nbsp;7&nbsp;in footprint (measured 6.7&nbsp;×&nbsp;6.5&nbsp;in), under 1.5&nbsp;lb (≈1.39&nbsp;lb), and a 5-second start delay.</li>
-      <li>Verified power delivery (7.27&nbsp;V main, 4.98&nbsp;V regulated, 3.29&nbsp;V logic) and tuned line-sensor thresholds against measured white/black readings.</li>
+      <li>Authored a full test plan with per subsystem procedures, expected versus actual results, and troubleshooting steps. Every subsystem passed its bench test.</li>
+      <li>Met all three competition constraints, a footprint under 7 by 7 inches (measured 6.7 by 6.5), a weight under 1.5 lb (about 1.39 lb), and a five second start delay.</li>
+      <li>Verified power delivery at 7.27 V on the main rail, 4.98 V regulated, and 3.29 V logic, and tuned the line sensor thresholds against measured white and black readings.</li>
     </ul>
 
     <div class="highlight">
-      <div class="n">5 subsystems · all bench-tested · all constraints met</div>
-      <div class="l">Power, motion, display, line sensing, and object detection — each validated independently, then integrated under one FSM.</div>
+      <div class="n">Five subsystems, one finite state machine, every test passed</div>
+      <div class="l">Power, motion, display, line sensing, and object detection, each validated on its own and then integrated into a search and push behavior loop.</div>
     </div>
 
     <div class="prevnext">
       <a href="debris-detection.html"><div class="k">Previous</div><b>← Debris Detection</b></a>
-      <a href="heart-rate-monitor.html" style="text-align:right;"><div class="k">Next</div><b>FPGA Heart-Rate Monitor →</b></a>
+      <a href="heart-rate-monitor.html" style="text-align:right;"><div class="k">Next</div><b>FPGA Heart Rate Monitor →</b></a>
     </div>
 
   </div>
@@ -99,7 +127,7 @@
     <div class="wrap">
       <span>© <span id="year"></span> Ousmane Nikiema</span>
       <span class="fl">
-        <a href="https://github.com/yourusername" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://github.com/ousmanezz" target="_blank" rel="noopener">GitHub</a>
         <a href="https://linkedin.com/in/ousmane-nikiema-398353217" target="_blank" rel="noopener">LinkedIn</a>
         <a href="mailto:nikiemao38@gmail.com">Email</a>
       </span>
